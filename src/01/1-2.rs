@@ -1,20 +1,43 @@
+use regex::Regex;
 
+const CAPTURE_REGEX_REVERSE: &str = r"(\d|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin)";
+const CAPTURE_REGEX_FORWARDS: &str = r"(\d|one|two|three|four|five|six|seven|eight|nine)";
+
+fn str_to_digit(string: &str) -> u32 {
+    match string {
+        "one" => 1,
+        "two" => 2,
+        "three" => 3,
+        "four" => 4,
+        "five" => 5,
+        "six" => 6,
+        "seven" => 7,
+        "eight" => 8,
+        "nine" => 9,
+        digit if digit.parse::<u32>().is_ok() => digit.parse::<u32>().unwrap(),
+        rest => panic!("panicked with {rest}")
+    }
+}
 
 fn main() {
-    println!("01-1");
+    println!("01-2");
+
+    let re_reverse = Regex::new(CAPTURE_REGEX_REVERSE).unwrap();
+    let re_forwards = Regex::new(CAPTURE_REGEX_FORWARDS).unwrap();
 
     let sum: u32 = INPUT.split('\n').map(|line| {
-        let digits = line.chars()
-            .filter(|character| character.is_digit(10))
-            .map(|character| character.to_digit(10).unwrap()).collect::<Vec<u32>>();
-
         let mut number = 0;
-        if let Some(digit) = digits.last() {
-                number+= digits.first().unwrap() * 10;
-                number+= digit;
-        }
+        if let Some(last_digit) = re_reverse.captures(&line.chars().rev().collect::<String>()).unwrap().iter().last() {
+            let digit = str_to_digit(&last_digit.unwrap().as_str().chars().rev().collect::<String>());
+
+            let first_digit = str_to_digit(re_forwards.captures(&line).unwrap().iter().nth(0).unwrap().unwrap().as_str());
+
+            number = first_digit * 10 + digit;
+        };
+        println!("{number}");
 
         number
+
     }).sum();
 
     println!("total sum: {sum}");
@@ -1020,5 +1043,4 @@ kqrcrqrqjbdeight7ckhr23
 oneeight2
 8eightnhtqcggtxc6dfsfcjfpznmsthree
 sxfvfdkff8dvlmbdktsixmzpnxzmml2
-9lgmxktj1frxl
-";
+9lgmxktj1frxl";
